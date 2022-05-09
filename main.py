@@ -10,6 +10,8 @@ import math
 MAX_SIZE = int(input("Input maximum set size >3 for simulation: "))
 NUM_SIMS = int(input("Input number of simulations for each size (recommended 500-1000): "))
 SCORING = input("Input scoring method ('add', 'mult', or 'root'): ")
+MAN_WEIGHT = float(input("Input weighting for man/proposer: "))
+WOMAN_WEIGHT = float(input("Input weighting for woman/accepter: "))
 SCORING = SCORING.lower()
 if SCORING != 'add' and SCORING != 'mult' and SCORING != 'root':
     raise ValueError('Scoring method must be add, mult, or root')
@@ -112,15 +114,15 @@ def stableMarriage(prefer):
         if SCORING == 'add':
             mtotscore += mscore
             wtotscore += wscore
-            total += (mscore + wscore)
+            total += ((MAN_WEIGHT * mscore) + (WOMAN_WEIGHT  * wscore))
         elif SCORING == 'mult':
             mtotscore += mscore
             wtotscore += wscore
-            total += (mscore * wscore)
+            total += ((MAN_WEIGHT * mscore) * (WOMAN_WEIGHT * wscore))
         elif SCORING == 'root':
             mtotscore += math.sqrt(mscore)
             wtotscore += math.sqrt(wscore)
-            total += (math.sqrt(mscore) + math.sqrt(wscore))
+            total += ((MAN_WEIGHT * math.sqrt(mscore)) + (WOMAN_WEIGHT * math.sqrt(wscore)))
     return total, mtotscore, wtotscore
 
 
@@ -158,15 +160,15 @@ for a in range(3, MAX_SIZE + 1):
         for i in range(N):
             for j in range(N):
                 if SCORING == 'add':
-                    hungprefer[i][j] = 1 + smprefer[i].index(j + N) + 1 + smprefer[j + N].index(i)
+                    hungprefer[i][j] = (MAN_WEIGHT * (1 + smprefer[i].index(j + N))) + (WOMAN_WEIGHT * (1 + smprefer[j + N].index(i)))
                     manhung[i][j] = 1 + smprefer[i].index(j + N)
                     womanhung[i][j] = 1 + smprefer[j + N].index(i)
                 elif SCORING == 'mult':
-                    hungprefer[i][j] = (1 + smprefer[i].index(j + N)) * (1 + smprefer[j + N].index(i))
+                    hungprefer[i][j] = MAN_WEIGHT * (1 + smprefer[i].index(j + N)) * WOMAN_WEIGHT * (1 + smprefer[j + N].index(i))
                     manhung[i][j] = 1 + smprefer[i].index(j + N)
                     womanhung[i][j] = 1 + smprefer[j + N].index(i)
                 elif SCORING == 'root':
-                    hungprefer[i][j] = math.sqrt(1 + smprefer[i].index(j + N)) + math.sqrt(1 + smprefer[j + N].index(i))
+                    hungprefer[i][j] = (MAN_WEIGHT * math.sqrt(1 + smprefer[i].index(j + N))) + (WOMAN_WEIGHT * math.sqrt(1 + smprefer[j + N].index(i)))
                     manhung[i][j] = math.sqrt(1 + smprefer[i].index(j + N))
                     womanhung[i][j] = math.sqrt(1 + smprefer[j + N].index(i))
 
@@ -207,13 +209,20 @@ ax.fill_between(df['N'], gs2, gs1, color='b', alpha=.1)
 ax.plot(df['N'], df['hung_mean'])
 ax.fill_between(df['N'], h2, h1, color='y', alpha=.1)
 ax.legend(['Gale Shapely', 'Hungarian'])
+plt.xlabel('Bipartite Set Size')
+plt.ylabel('Score')
+title = 'Mean +- 1 Stdev for Scoring Method: ' + SCORING + ', with man weighting: ' + str(MAN_WEIGHT) + ' and woman weighting: ' + str(WOMAN_WEIGHT) + ', for ' + str(NUM_SIMS) + ' simulations'
+plt.title(title)
 plt.show()
 
-plt.figure()
 fig, ax = plt.subplots()
 ax.plot(df['N'], df['gs_man_mean'])
 ax.plot(df['N'], df['gs_w_mean'])
 ax.plot(df['N'], df['h_man_mean'])
 ax.plot(df['N'], df['h_w_mean'])
 ax.legend(['GS Man', "GS Woman", "Hung Man", "Hung Woman"])
+plt.xlabel('Bipartite Set Size')
+plt.ylabel('Score')
+title = 'Bipartite Results for Scoring Method: ' + SCORING + ', with man weighting: ' + str(MAN_WEIGHT) + ' and woman weighting: ' + str(WOMAN_WEIGHT) + ', for ' + str(NUM_SIMS) + ' simulations'
+plt.title(title)
 plt.show()
