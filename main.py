@@ -6,7 +6,7 @@ from statistics import mean, stdev
 import matplotlib.pyplot as plt
 import math
 
-# Number of Men or Women
+#Initialized global variables through inputs
 MAX_SIZE = int(input("Input maximum set size >3 for simulation: "))
 NUM_SIMS = int(input("Input number of simulations for each size (recommended 500-1000): "))
 SCORING = input("Input scoring method ('add', 'mult', or 'root'): ")
@@ -128,9 +128,10 @@ def stableMarriage(prefer):
 
 # Driver Code
 
-
+# creates a df to store the results
 df = pd.DataFrame()
 
+# loops through matchings of size 3 to Max size
 for a in range(3, MAX_SIZE + 1):
     gs = []
     hung = []
@@ -139,10 +140,12 @@ for a in range(3, MAX_SIZE + 1):
     mh = []
     wh = []
     print(a)
+    # loops through Num_sims simulations
     for b in range(NUM_SIMS + 1):
         N = a
         manpref = []
         womanpref = []
+        #creates random preferences
         for i in range(N):
             w = np.arange(start=0, stop=N, step=1).tolist()
             m = np.arange(start=N, stop=2 * N, step=1).tolist()
@@ -153,10 +156,12 @@ for a in range(3, MAX_SIZE + 1):
 
         smprefer = manpref
         smprefer.extend(womanpref)
+        # initialized hungarian cost matrices
         hungprefer = np.empty((N, N))
         manhung = np.empty((N, N))
         womanhung = np.empty((N, N))
 
+        # creates the hungarian cost matrix based on the scoring method
         for i in range(N):
             for j in range(N):
                 if SCORING == 'add':
@@ -172,14 +177,14 @@ for a in range(3, MAX_SIZE + 1):
                     manhung[i][j] = math.sqrt(1 + smprefer[i].index(j + N))
                     womanhung[i][j] = math.sqrt(1 + smprefer[j + N].index(i))
 
-
-
-
+        # returns the results for both gale-shapley and hungarian
         tot_score, man_score, w_score = stableMarriage(smprefer)
         row_ind, col_ind = opt.linear_sum_assignment(hungprefer)
         hungscore = hungprefer[row_ind, col_ind].sum()
         m_h_score = manhung[row_ind, col_ind].sum()
         w_h_score = womanhung[row_ind, col_ind].sum()
+
+        # adds the total, man, woman results for both algos into a list
         gs.append(tot_score)
         hung.append(hungscore)
         mgs.append(man_score)
@@ -187,22 +192,26 @@ for a in range(3, MAX_SIZE + 1):
         mh.append(m_h_score)
         wh.append(w_h_score)
 
+    # prints out the mean scores for each bipartite size
     print('gs: ', mean(gs), 'hung', mean(hung))
 
+    # appends all results to the df
     df = df.append({'N': N, 'gs_mean': mean(gs), 'gs_sd': stdev(gs), 'hung_mean': mean(hung), 'hung_sd': stdev(hung),
                     'gs_man_mean': mean(mgs), 'gs_w_mean': mean(wgs), 'gs_man_sd': stdev(mgs), 'gs_w_sd': stdev(wgs),
                     'h_man_mean': mean(mh), 'h_man_sd': stdev(mh), 'h_w_mean': mean(wh), 'h_w_sd': stdev(wh)},
                    ignore_index=True)
 
+# saves out the simulation results
 df.to_csv('gs_results.csv')
 
+# greates the stddev bands for plotting
 gs1 = df['gs_mean'] + df['gs_sd']
 gs2 = df['gs_mean'] - df['gs_sd']
 
 h1 = df['hung_mean'] + df['hung_sd']
 h2 = df['hung_mean'] - df['hung_sd']
 
-
+# plots the mean non-gendered results with standard dev bands
 fig, ax = plt.subplots()
 ax.plot(df['N'], df['gs_mean'])
 ax.fill_between(df['N'], gs2, gs1, color='b', alpha=.1)
@@ -215,6 +224,7 @@ title = 'Mean +- 1 Stdev for Scoring Method: ' + SCORING + ', with man weighting
 plt.title(title)
 plt.show()
 
+# plots the mean gendered results
 fig, ax = plt.subplots()
 ax.plot(df['N'], df['gs_man_mean'])
 ax.plot(df['N'], df['gs_w_mean'])
