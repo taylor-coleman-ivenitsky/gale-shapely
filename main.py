@@ -13,6 +13,7 @@ SCORING = input("Input scoring method ('add', 'mult', 'root', or 'square'): ")
 MAN_WEIGHT = float(input("Input weighting for man/proposer: "))
 WOMAN_WEIGHT = float(input("Input weighting for woman/accepter: "))
 SCORING = SCORING.lower()
+NORMALIZE = bool(input('Normalize Scoring output by set size? True/False: '))
 if SCORING != 'add' and SCORING != 'mult' and SCORING != 'root' and SCORING != 'square':
     raise ValueError('Scoring method must be add, mult, square or root')
 
@@ -192,6 +193,13 @@ for a in range(3, MAX_SIZE + 1):
         hungscore = hungprefer[row_ind, col_ind].sum()
         m_h_score = manhung[row_ind, col_ind].sum()
         w_h_score = womanhung[row_ind, col_ind].sum()
+        if NORMALIZE:
+            hungscore = hungscore/a
+            tot_score = tot_score/a
+            man_score = man_score/a
+            w_score = w_score/a
+            m_h_score = m_h_score/a
+            w_h_score = w_h_score/a
 
         # adds the total, man, woman results for both algos into a list
         gs.append(tot_score)
