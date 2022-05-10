@@ -10,7 +10,7 @@
 
 -"Input number of simulations for each size (recommended 500-1000)" is the number of simulations per bipartite size you wish to run, a higher number will be slower but guarantee smoother results (only enter ints)
 
--"Input scoring method ('add', 'mult', or 'root'): " is more complicated
+-"Input scoring method ('add', 'mult', or 'root',  or 'square'): " is more complicated
 
 - the add scoring method minimizes the sum of the two ranks for each person for each matching. If man i ranks woman j as third and woman j ranks man i as fifth then cost ij is 8.
 

@@ -9,12 +9,12 @@ import math
 #Initialized global variables through inputs
 MAX_SIZE = int(input("Input maximum set size >3 for simulation: "))
 NUM_SIMS = int(input("Input number of simulations for each size (recommended 500-1000): "))
-SCORING = input("Input scoring method ('add', 'mult', or 'root'): ")
+SCORING = input("Input scoring method ('add', 'mult', 'root', or 'square'): ")
 MAN_WEIGHT = float(input("Input weighting for man/proposer: "))
 WOMAN_WEIGHT = float(input("Input weighting for woman/accepter: "))
 SCORING = SCORING.lower()
-if SCORING != 'add' and SCORING != 'mult' and SCORING != 'root':
-    raise ValueError('Scoring method must be add, mult, or root')
+if SCORING != 'add' and SCORING != 'mult' and SCORING != 'root' and SCORING != 'square':
+    raise ValueError('Scoring method must be add, mult, square or root')
 
 # This function returns true if
 # woman 'w' prefers man 'm1' over man 'm'
@@ -123,6 +123,10 @@ def stableMarriage(prefer):
             mtotscore += math.sqrt(mscore)
             wtotscore += math.sqrt(wscore)
             total += ((MAN_WEIGHT * math.sqrt(mscore)) + (WOMAN_WEIGHT * math.sqrt(wscore)))
+        elif SCORING == 'square':
+            mtotscore += (mscore) ** 2
+            wtotscore += (wscore) ** 2
+            total += ((MAN_WEIGHT * (mscore ** 2)) + (WOMAN_WEIGHT * (wscore ** 2)))
     return total, mtotscore, wtotscore
 
 
@@ -176,6 +180,11 @@ for a in range(3, MAX_SIZE + 1):
                     hungprefer[i][j] = (MAN_WEIGHT * math.sqrt(1 + smprefer[i].index(j + N))) + (WOMAN_WEIGHT * math.sqrt(1 + smprefer[j + N].index(i)))
                     manhung[i][j] = math.sqrt(1 + smprefer[i].index(j + N))
                     womanhung[i][j] = math.sqrt(1 + smprefer[j + N].index(i))
+                elif SCORING == 'square':
+                    hungprefer[i][j] = (MAN_WEIGHT * ((1 + smprefer[i].index(j + N))**2)) + (
+                                WOMAN_WEIGHT * ((1 + smprefer[j + N].index(i))**2))
+                    manhung[i][j] = (1 + smprefer[i].index(j + N)) **2
+                    womanhung[i][j] = (1 + smprefer[j + N].index(i)) ** 2
 
         # returns the results for both gale-shapley and hungarian
         tot_score, man_score, w_score = stableMarriage(smprefer)
